@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { collection, getDocs, limit, query, where } from "firebase/firestore";
 import { ArrowLeft, Bot, Camera, Copy, ImagePlus, Images, Loader2, Mail, MessageCircle, Mic, Pencil, Send, Square, Trash2, X } from "lucide-react";
 import { db } from "../../lib/firebase";
@@ -20,13 +21,13 @@ async function compressImage(file: File): Promise<string> {
   const url = URL.createObjectURL(file);
   const img = new Image();
   await new Promise((r, j) => { img.onload = r; img.onerror = j; img.src = url; });
-  const s = Math.min(1, 1280 / Math.max(img.width, img.height));
+  const s = Math.min(1, 2048 / Math.max(img.width, img.height));
   const c = document.createElement("canvas");
   c.width = Math.round(img.width * s);
   c.height = Math.round(img.height * s);
   c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
   URL.revokeObjectURL(url);
-  return c.toDataURL("image/jpeg", 0.85);
+  return c.toDataURL("image/jpeg", 0.92);
 }
 
 async function findAdmin(): Promise<UserProfile | null> {
@@ -141,6 +142,20 @@ export function FlyAIPage({
   };
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Phone/browser back button closes Fly AI.
+  const backRef = useRef(onBack);
+  backRef.current = onBack;
+  useEffect(() => {
+    window.history.pushState({ flyAi: true }, "");
+    const onPop = () => backRef.current();
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+  const goBack = () => {
+    if (window.history.state?.flyAi) window.history.back();
+    else onBack();
+  };
+
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
@@ -248,7 +263,7 @@ export function FlyAIPage({
   return (
     <div className="fixed inset-0 z-50 mx-auto w-full max-w-md flex flex-col h-[100dvh] overflow-hidden bg-white">
       <header className="flex items-center gap-3 px-4 h-14 border-b border-gray-100 bg-white">
-        <button onClick={onBack} aria-label="Back" className="text-gray-500">
+        <button type="button" onClick={goBack} aria-label="Back" className="-ml-2 w-10 h-10 flex items-center justify-center rounded-full text-gray-600 active:bg-gray-100">
           <ArrowLeft size={22} />
         </button>
         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 text-white flex items-center justify-center">
@@ -286,7 +301,17 @@ export function FlyAIPage({
                   )}
                   {m.content ? (
                     <div className="prose prose-sm max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1">
-                      <ReactMarkdown>{m.content.replace(/\[\[(CONTACT_ADMIN|EMAIL_ADMIN)\]\]/g, "")}</ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}
+                        components={{
+                          a: ({ href, children }) => (
+                            <a href={href} target="_blank" rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-sky-600 underline break-all font-medium">
+                              {children} ↗
+                            </a>
+                          ),
+                        }}
+                      >{m.content.replace(/\[\[(CONTACT_ADMIN|EMAIL_ADMIN)\]\]/g, "")}</ReactMarkdown>
                       {m.content.includes("[[CONTACT_ADMIN]]") && (
                         <button type="button" onClick={() => void contactAdmin()} disabled={adminBusy}
                           className="not-prose mt-2 flex items-center gap-1.5 px-3 py-2 rounded-full bg-sky-500 text-white text-xs font-semibold disabled:opacity-60">
