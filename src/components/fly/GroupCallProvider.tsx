@@ -13,7 +13,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { collection, getDoc, onSnapshot, query, where } from "firebase/firestore";
+import { collection, getDoc, getDocs, onSnapshot, query, where } from "firebase/firestore";
 import { Mic, MicOff, PhoneOff, SwitchCamera, Users, Video, VideoOff } from "lucide-react";
 
 import { db, DEFAULT_AVATAR } from "../../lib/firebase";
@@ -522,7 +522,7 @@ export function GroupCallProvider({ children }: { children: ReactNode }) {
       collection(db, "groupCalls"),
       where("invitedIds", "array-contains", user.uid),
     );
-    return onSnapshot(q, (snap) => {
+    const handle = (snap: { docs: Array<{ id: string; data: () => unknown }> }) => {
       if (callIdRef.current) return;
       const found = snap.docs
         .map((d) => ({ id: d.id, ...(d.data() as Omit<GroupCallDoc, "id">) }))
@@ -551,7 +551,30 @@ export function GroupCallProvider({ children }: { children: ReactNode }) {
           setCall(data);
         }),
       );
-    });
+    };
+    const unsub = onSnapshot(q, handle, () => {});
+    // Wake-up re-checks: the live listener sleeps while the app is in the
+    // background, so look again when the app becomes visible / online.
+    const recheck = () => {
+      if (callIdRef.current) return;
+      void getDocs(q).then(handle).catch(() => {});
+    };
+    const onVis = () => {
+      if (document.visibilityState === "visible") recheck();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", recheck);
+    window.addEventListener("online", recheck);
+    const poll = setInterval(() => {
+      if (document.visibilityState === "visible") recheck();
+    }, 6000);
+    return () => {
+      unsub();
+      clearInterval(poll);
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", recheck);
+      window.removeEventListener("online", recheck);
+    };
   }, [user]);
 
   /** Auto-drop a ringing invite that nobody answered. */

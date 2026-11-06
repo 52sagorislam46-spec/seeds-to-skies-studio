@@ -9,6 +9,7 @@ import {
 } from "react";
 import {
   collection,
+  getDocs,
   onSnapshot,
   query,
   updateDoc,
@@ -772,7 +773,7 @@ export function CallProvider({ children }: { children: ReactNode }) {
       collection(db, "calls"),
       where("calleeId", "==", user.uid),
     );
-    return onSnapshot(q, (snap) => {
+    const handle = (snap: { docs: Array<{ id: string; data: () => unknown }> }) => {
       if (callIdRef.current) return;
       const candidates = snap.docs
         .map((docSnap) => ({
@@ -819,7 +820,36 @@ export function CallProvider({ children }: { children: ReactNode }) {
           }
         }),
       );
-    }, () => setNotice("Call notifications are temporarily unavailable."));
+    };
+    const unsub = onSnapshot(q, handle, () =>
+      setNotice("Call notifications are temporarily unavailable."),
+    );
+    // Phones (and app wrappers) put the live listener to sleep in the
+    // background. Re-check for ringing calls whenever the app wakes up, gets
+    // focus, comes back online, or is opened from a call notification.
+    const recheck = () => {
+      if (callIdRef.current) return;
+      void getDocs(q).then(handle).catch(() => {});
+    };
+    const onVis = () => {
+      if (document.visibilityState === "visible") recheck();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", recheck);
+    window.addEventListener("online", recheck);
+    window.addEventListener("pageshow", recheck);
+    const poll = setInterval(() => {
+      if (document.visibilityState === "visible") recheck();
+    }, 5000);
+    recheck();
+    return () => {
+      unsub();
+      clearInterval(poll);
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", recheck);
+      window.removeEventListener("online", recheck);
+      window.removeEventListener("pageshow", recheck);
+    };
   }, [user, teardown]);
 
   const accept = useCallback(async () => {
