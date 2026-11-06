@@ -306,7 +306,11 @@ export function FlyAIPage({
                 </>
               ) : m.role === "user" ? (
                 <>
-                  {m.image && <img src={m.image} alt="Uploaded" className="rounded-xl mb-2 w-full max-h-64 object-cover" />}
+                  {m.image && (
+                    <button type="button" onClick={() => setViewImg(m.image!)} className="block w-full cursor-zoom-in" aria-label="ছবি বড় করে দেখুন">
+                      <img src={m.image} alt="Uploaded" className="rounded-xl mb-2 w-full h-auto object-contain" />
+                    </button>
+                  )}
                   {m.content}
                 </>
               ) : (
