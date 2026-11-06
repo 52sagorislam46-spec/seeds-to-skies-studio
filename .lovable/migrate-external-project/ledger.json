@@ -1,0 +1,17 @@
+{
+  "source": "github",
+  "repo": "https://github.com/52sagorislam46-spec/grow-learn-take-flight.git",
+  "capabilities": [
+    {"capability": "code", "source": "git clone", "outcome": "full copy of src, public, config; nothing removed", "status": "verified"},
+    {"capability": "schema", "source": "Firebase Firestore (project fly-c7445)", "outcome": "app kept connected to the same Firebase project; schema untouched", "status": "verified"},
+    {"capability": "records", "source": "Firebase Firestore", "outcome": "data stays live in the same Firebase project, no export/import needed", "status": "verified"},
+    {"capability": "auth identities", "source": "Firebase Auth", "outcome": "same Firebase Auth project kept; existing users sign in as before", "status": "verified"},
+    {"capability": "authorization", "source": "app-level admins.ts / moderation.ts", "outcome": "unchanged", "status": "verified"},
+    {"capability": "media", "source": "lovable-assets pointers", "outcome": "29 assets (logo, 49s ad video, 27 reels) re-uploaded to this project; pointer files replaced in place", "status": "verified"},
+    {"capability": "ad settings", "source": "src/components/fly/ads.tsx", "outcome": "unchanged", "status": "verified"},
+    {"capability": "external providers", "source": "Cloudinary (xl2cfqi1), dicebear, OneSignal", "outcome": "preserved as-is", "status": "verified"},
+    {"capability": "push notifications", "source": "firebase-messaging-sw.js + OneSignalSDKWorker.js", "outcome": "files copied; live delivery depends on the same Firebase project", "status": "verified"},
+    {"capability": "public endpoints", "source": "src/routes/api/diagnose.ts, fly-ai.ts", "outcome": "copied", "status": "verified"},
+    {"capability": "cutover", "source": "n/a", "outcome": "same Firebase/Cloudinary accounts continue in use", "status": "verified"}
+  ]
+}

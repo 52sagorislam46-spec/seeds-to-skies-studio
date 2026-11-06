@@ -1,0 +1,13 @@
+- [x] Remove automatic starter/demo star defaults without changing other features.
+- [x] Reset all 7 existing accounts' star, received/withdrawn star, and wallet balances once; verify zero values and preserve other fields.
+- [x] Verify zero-starter test, successful build, and error-free sign-in preview; wallet UI requires the user's Firebase session.
+- [x] Add per-viewer removal to Withdrawal Requests without deleting payment data; verify tests and preview.
+- [x] Members page: show password button and set new password button.
+- [x] Restore Fly logo image.
+- [x] Fix ad auto-resume after skip/finish and live camera over-zoom (pending user device check).
+- [ ] Fix admin Set-new-password: admin-set password must log in on first try (Firestore rules now block logged-out reads).
+- [ ] Premium subscription: real-time profile updates; activate all premium perks (ad-free, verified badge, premium theme/stickers/reactions); admin premium toggle in Members page.
+- [ ] Ad rules: autoplay without play-icon screen, 5s skip countdown, full 49s playback if not skipped, auto-return to reels, no star reward for watching the ad.
+- [ ] Hide +/- zoom controls and percentage in all image viewers; keep pinch-to-zoom and drag.
+- [ ] Delete post/video must immediately vanish from timeline, reels, and profile (cache/snapshot fix).
+- [ ] Tighten Firebase rules (passwords stored as plain text) — needs user's Firebase console.
