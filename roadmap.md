@@ -11,3 +11,4 @@
 - [ ] Hide +/- zoom controls and percentage in all image viewers; keep pinch-to-zoom and drag.
 - [ ] Delete post/video must immediately vanish from timeline, reels, and profile (cache/snapshot fix).
 - [ ] Tighten Firebase rules (passwords stored as plain text) — needs user's Firebase console.
+- [ ] Stop stale incoming group calls from ringing repeatedly and harden call/voice media handling without removing existing features.
