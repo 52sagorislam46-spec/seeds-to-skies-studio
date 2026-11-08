@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.lovable.seeds_to_skies_studio.twa",
+      "sha256_cert_fingerprints": [
+        "FF:8A:C4:AF:6A:5B:4A:94:06:D3:51:0A:A8:C0:CE:62:BF:DD:92:BE:52:49:40:2B:54:EF:AA:D3:2D:7D:67:EE"
+      ]
+    }
+  }
+]
