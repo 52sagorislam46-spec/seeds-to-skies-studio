@@ -46,16 +46,27 @@ export function secureUrl(url: unknown): string {
 export async function uploadToCloudinary(
   file: File,
 ): Promise<{ url: string; resourceType: string }> {
-  const form = new FormData();
-  form.append("file", file);
-  form.append("upload_preset", UPLOAD_PRESET);
-  const res = await fetch(`${CLOUDINARY_URL}/auto/upload`, {
-    method: "POST",
-    body: form,
-  });
-  const data = await res.json();
-  const url = secureUrl(data.secure_url);
-  if (!res.ok || !url || !/^https:\/\//.test(url)) {
+  // Audio recordings are sometimes rejected by /auto ("Unsupported video
+  // format"), so audio falls back to /video then /raw.
+  const isAudio = file.type.startsWith("audio/");
+  const endpoints = isAudio ? ["auto", "video", "raw"] : ["auto"];
+  let data: { secure_url?: string; resource_type?: string; error?: { message?: string } } = {};
+  let url = "";
+  for (const ep of endpoints) {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("upload_preset", UPLOAD_PRESET);
+    try {
+      const res = await fetch(`${CLOUDINARY_URL}/${ep}/upload`, { method: "POST", body: form });
+      data = await res.json();
+      url = secureUrl(data.secure_url);
+      if (res.ok && /^https:\/\//.test(url)) break;
+    } catch {
+      /* try next */
+    }
+    url = "";
+  }
+  if (!url) {
     throw new Error(
       data?.error?.message ?? "Cloudinary upload failed. Check the upload preset.",
     );

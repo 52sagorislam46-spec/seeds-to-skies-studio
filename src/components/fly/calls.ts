@@ -58,23 +58,6 @@ export const RTC_CONFIG: RTCConfiguration = {
       username: "b0a51fef98435887eb20a23a",
       credential: "SkfJFOAbWhkEt5Ex",
     },
-    // Free relay servers so the audio/video still flows when both sides are
-    // behind mobile / carrier NAT where a direct connection is impossible.
-    {
-      urls: [
-        "turn:openrelay.metered.ca:80",
-        "turn:openrelay.metered.ca:443",
-        "turn:openrelay.metered.ca:443?transport=tcp",
-      ],
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-    // Extra free public relay (backup when the others are unreachable).
-    {
-      urls: ["turn:freestun.net:3478", "turn:freestun.net:3478?transport=tcp"],
-      username: "free",
-      credential: "free",
-    },
   ],
   iceCandidatePoolSize: 10,
 };
