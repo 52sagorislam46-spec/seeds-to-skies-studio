@@ -817,6 +817,16 @@ export function CallProvider({ children }: { children: ReactNode }) {
           // matter if we are still ringing or already connecting.
           if (!live || live.status === "ended" || live.status === "rejected") {
             if (callIdRef.current === data.id) teardown();
+            return;
+          }
+          // Still ringing past its invite window (caller vanished): stop.
+          if (
+            live.status === "ringing" &&
+            live.expiresAt &&
+            live.expiresAt < Date.now() &&
+            callIdRef.current === data.id
+          ) {
+            teardown("ended");
           }
         }),
       );
@@ -933,6 +943,19 @@ export function CallProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const reject = useCallback(() => teardown("rejected"), [teardown]);
+
+  /** Incoming ring must stop at the invite deadline, even if the caller vanished. */
+  const ringDeadline = call?.expiresAt;
+  useEffect(() => {
+    if (phase !== "incoming" || !call?.id) return;
+    const id = call.id;
+    const left = Math.max(0, Math.min(90_000, (ringDeadline ?? Date.now() + 90_000) - Date.now()));
+    const t = setTimeout(() => {
+      if (callIdRef.current === id) teardown("ended");
+    }, left);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, call?.id, ringDeadline]);
   const hangUp = useCallback(() => teardown("ended"), [teardown]);
 
   useEffect(() => () => teardown(), [teardown]);

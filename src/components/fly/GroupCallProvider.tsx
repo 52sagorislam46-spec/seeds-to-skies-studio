@@ -531,12 +531,16 @@ export function GroupCallProvider({ children }: { children: ReactNode }) {
             item.hostId !== user.uid &&
             // A live call can always be joined; a ringing one only while
             // it is still fresh (so an abandoned call never rings forever).
-            (item.status === "active" ||
-              (item.status === "ringing" &&
-                (!item.expiresAt || item.expiresAt > Date.now()))),
+            (item.status === "active" || item.status === "ringing") &&
+            // Only ring a fresh invite (never an old/abandoned call) and
+            // never ring the same call twice on this device.
+            !!item.expiresAt &&
+            item.expiresAt > Date.now() &&
+            !isGroupCallDismissed(item.id),
         )
         .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))[0];
       if (!found) return;
+      dismissGroupCall(found.id);
       callIdRef.current = found.id;
       loggedRef.current = false;
       setCall(found);
@@ -577,12 +581,18 @@ export function GroupCallProvider({ children }: { children: ReactNode }) {
     };
   }, [user]);
 
-  /** Auto-drop a ringing invite that nobody answered. */
+  /** Auto-drop a ringing invite that nobody answered (absolute deadline). */
+  const incomingDeadline = call?.expiresAt;
   useEffect(() => {
-    if (phase !== "incoming" || !call) return;
-    const timer = setTimeout(() => leaveRef.current(), 90_000);
+    if (phase !== "incoming" || !call?.id) return;
+    const left = Math.max(0, Math.min(90_000, (incomingDeadline ?? Date.now() + 90_000) - Date.now()));
+    const timer = setTimeout(() => leaveRef.current(), left);
     return () => clearTimeout(timer);
-  }, [phase, call]);
+  }, [phase, call?.id, incomingDeadline]);
+
+  const hostSomeoneJoined = participants.some(
+    (p) => p.uid !== user?.uid && isFreshlyJoined(p),
+  );
 
   /**
    * Caller side: keep ringing until somebody in the group actually answers,
@@ -592,17 +602,15 @@ export function GroupCallProvider({ children }: { children: ReactNode }) {
     const me = user?.uid;
     if (!call || !me || call.hostId !== me) return;
     if (phase !== "outgoing" && phase !== "joined") return;
-    const someoneJoined = participants.some(
-      (p) => p.uid !== me && isFreshlyJoined(p),
-    );
-    if (someoneJoined) {
+    if (hostSomeoneJoined) {
       ringbackRef.current?.stop();
       return;
     }
     ringbackRef.current?.start();
     const timer = setTimeout(() => leaveRef.current({ endForAll: true }), 90_000);
     return () => clearTimeout(timer);
-  }, [call, participants, phase, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [call?.id, hostSomeoneJoined, phase, user]);
 
 
 
@@ -1030,3 +1038,18 @@ export function GroupCallProvider({ children }: { children: ReactNode }) {
 }
 
 export { useGroupCalls };
+
+const DISMISS_KEY = "fly.dismissedGroupCalls";
+function readDismissed(): Record<string, number> {
+  try { return JSON.parse(localStorage.getItem(DISMISS_KEY) || "{}"); } catch { return {}; }
+}
+function isGroupCallDismissed(id: string) {
+  return typeof window !== "undefined" && !!readDismissed()[id];
+}
+function dismissGroupCall(id: string) {
+  try {
+    const m = readDismissed(); const now = Date.now(); m[id] = now;
+    for (const k of Object.keys(m)) if (now - (m[k] ?? 0) > 86_400_000) delete m[k];
+    localStorage.setItem(DISMISS_KEY, JSON.stringify(m));
+  } catch { /* ignore */ }
+}
