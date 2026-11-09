@@ -11,6 +11,8 @@ export interface UserProfile {
   pronoun?: string;
   country?: string;
   preferredLanguage?: string;
+  /** Per-field visibility ("public" / "private" = Only me). */
+  fieldPrivacy?: Partial<Record<"birthDate" | "phone" | "email" | "gender" | "country", "public" | "private">>;
   followers: string[];
   following: string[];
   viewedStoryIds?: string[];

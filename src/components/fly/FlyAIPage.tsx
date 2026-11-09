@@ -261,19 +261,19 @@ export function FlyAIPage({
   };
 
   return (
-    <div className="fixed inset-0 z-50 mx-auto w-full max-w-md flex flex-col h-[100dvh] overflow-hidden bg-white">
-      <header className="flex items-center gap-3 px-4 h-14 border-b border-gray-100 bg-white">
-        <button type="button" onClick={goBack} aria-label="Back" className="-ml-2 w-10 h-10 flex items-center justify-center rounded-full text-gray-600 active:bg-gray-100">
+    <div className="fixed inset-0 z-50 mx-auto w-full max-w-md flex flex-col h-[100dvh] overflow-hidden bg-[#131314] text-[#e3e3e3]">
+      <header className="flex items-center gap-3 px-4 h-14 border-b border-white/10 bg-[#131314]">
+        <button type="button" onClick={goBack} aria-label="Back" className="-ml-2 w-10 h-10 flex items-center justify-center rounded-full text-gray-300 active:bg-white/10">
           <ArrowLeft size={22} />
         </button>
         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 text-white flex items-center justify-center">
           <Bot size={20} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-900 leading-tight">Fly AI</p>
-          <p className="text-xs text-gray-500">Ask anything · Create images</p>
+          <p className="font-semibold text-white leading-tight">Fly AI</p>
+          <p className="text-xs text-gray-400">Ask anything · Create images</p>
         </div>
-        <button onClick={clearChat} aria-label="চ্যাট মুছুন" title="চ্যাট হিস্টোরি মুছুন" className="w-9 h-9 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center">
+        <button onClick={clearChat} aria-label="চ্যাট মুছুন" title="চ্যাট হিস্টোরি মুছুন" className="w-9 h-9 rounded-full bg-white/5 text-gray-400 flex items-center justify-center">
           <Trash2 size={17} />
         </button>
       </header>
@@ -286,10 +286,10 @@ export function FlyAIPage({
               style={{ WebkitUserSelect: "text", userSelect: "text", WebkitTouchCallout: "default" } as Record<string, string>}
               className={`select-text max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm ${
                 m.role === "user"
-                  ? "bg-sky-500 text-white rounded-br-md whitespace-pre-wrap"
+                  ? "bg-[#2f3033] text-white rounded-br-md whitespace-pre-wrap"
                   : m.role === "error"
-                    ? "bg-red-50 text-red-700"
-                    : "bg-gray-100 text-gray-900 rounded-bl-md"
+                    ? "bg-red-950/60 text-red-300"
+                    : "bg-transparent text-[#e3e3e3] rounded-bl-md px-1"
               }`}
             >
               {m.role === "assistant" ? (
@@ -300,13 +300,13 @@ export function FlyAIPage({
                     </button>
                   )}
                   {m.content ? (
-                    <div className="prose prose-sm max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1">
+                    <div className="prose prose-sm prose-invert max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}
                         components={{
                           a: ({ href, children }) => (
                             <a href={href} target="_blank" rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="text-sky-600 underline break-all font-medium">
+                              className="text-sky-400 underline break-all font-medium">
                               {children} ↗
                             </a>
                           ),
@@ -343,10 +343,10 @@ export function FlyAIPage({
               )}
             </div>
             {i > 0 && m.role !== "error" && (
-              <div className={`mt-1 flex gap-1 text-gray-400 ${menu === i ? "" : "opacity-70"}`}>
-                <button type="button" onClick={() => void copyMsg(i)} aria-label="Copy" className="p-1 hover:text-gray-700"><Copy size={14} /></button>
+              <div className={`mt-1 flex gap-1 text-gray-500 ${menu === i ? "" : "opacity-70"}`}>
+                <button type="button" onClick={() => void copyMsg(i)} aria-label="Copy" className="p-1 hover:text-gray-200"><Copy size={14} /></button>
                 {m.role === "user" && !busy && (
-                  <button type="button" onClick={() => editMsg(i)} aria-label="Edit" className="p-1 hover:text-gray-700"><Pencil size={14} /></button>
+                  <button type="button" onClick={() => editMsg(i)} aria-label="Edit" className="p-1 hover:text-gray-200"><Pencil size={14} /></button>
                 )}
                 <button type="button" onClick={() => deleteMsg(i)} aria-label="Delete / Unsend" className="p-1 hover:text-red-600"><Trash2 size={14} /></button>
               </div>
@@ -354,7 +354,7 @@ export function FlyAIPage({
           </div>
         ))}
         {busy && imageMode && (
-          <div className="flex items-center gap-2 text-xs text-gray-500">
+          <div className="flex items-center gap-2 text-xs text-gray-400">
             <Loader2 size={14} className="animate-spin" /> Creating your image…
           </div>
         )}
@@ -364,12 +364,12 @@ export function FlyAIPage({
         <div className="absolute left-1/2 -translate-x-1/2 bottom-24 px-3 py-1.5 rounded-full bg-gray-900 text-white text-xs z-20">{toast}</div>
       )}
       {attach && (
-        <div className="px-3 pt-2 border-t border-gray-100 bg-white flex items-center gap-2">
+        <div className="px-3 pt-2 border-t border-white/10 bg-[#131314] flex items-center gap-2">
           <div className="relative">
             <img src={attach} alt="Attachment" className="w-16 h-16 rounded-xl object-cover" />
             <button type="button" onClick={() => setAttach(null)} aria-label="Remove photo" className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gray-900 text-white flex items-center justify-center"><X size={12} /></button>
           </div>
-          <span className="text-xs text-gray-500">ছবি সম্পর্কে প্রশ্ন লিখুন বা সরাসরি পাঠান</span>
+          <span className="text-xs text-gray-400">ছবি সম্পর্কে প্রশ্ন লিখুন বা সরাসরি পাঠান</span>
         </div>
       )}
       <input ref={galRef} type="file" accept="image/*" hidden onChange={(e) => { void onPick(e.target.files?.[0]); e.target.value = ""; }} />
@@ -379,24 +379,24 @@ export function FlyAIPage({
           e.preventDefault();
           void send();
         }}
-        className="flex items-end gap-2 px-3 py-2 border-t border-gray-100 bg-white pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+        className="flex items-end gap-2 px-3 py-2 border-t border-white/10 bg-[#131314] pb-[max(0.5rem,env(safe-area-inset-bottom))]"
       >
         <button
           type="button"
           onClick={() => setImageMode((v) => !v)}
           aria-label="Create image"
           className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${
-            imageMode ? "bg-indigo-500 text-white" : "bg-gray-100 text-gray-600"
+            imageMode ? "bg-indigo-500 text-white" : "bg-[#1e1f20] text-gray-300"
           }`}
         >
           <ImagePlus size={19} />
         </button>
         <button type="button" onClick={() => galRef.current?.click()} aria-label="Upload from gallery"
-          className="w-10 h-10 shrink-0 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center">
+          className="w-10 h-10 shrink-0 rounded-full bg-[#1e1f20] text-gray-300 flex items-center justify-center">
           <Images size={19} />
         </button>
         <button type="button" onClick={() => camRef.current?.click()} aria-label="Take photo"
-          className="w-10 h-10 shrink-0 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center max-[380px]:hidden">
+          className="w-10 h-10 shrink-0 rounded-full bg-[#1e1f20] text-gray-300 flex items-center justify-center max-[380px]:hidden">
           <Camera size={19} />
         </button>
         <textarea
@@ -410,10 +410,10 @@ export function FlyAIPage({
           }}
           rows={1}
           placeholder={imageMode ? "Describe the picture…" : "Ask Fly AI anything…"}
-          className="flex-1 resize-none max-h-32 rounded-2xl bg-gray-100 px-4 py-2.5 text-sm outline-none"
+          className="flex-1 resize-none max-h-32 rounded-3xl bg-[#1e1f20] text-[#e3e3e3] placeholder-gray-500 px-4 py-2.5 text-sm outline-none border border-white/10 focus:border-sky-500/50"
         />
         <button type="button" onClick={toggleVoice} aria-label="Voice"
-          className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${listening ? "bg-red-500 text-white animate-pulse" : "bg-gray-100 text-gray-600"}`}>
+          className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${listening ? "bg-red-500 text-white animate-pulse" : "bg-[#1e1f20] text-gray-300"}`}>
           <Mic size={18} />
         </button>
         {busy ? (
@@ -421,7 +421,7 @@ export function FlyAIPage({
             type="button"
             onClick={() => abortRef.current?.abort()}
             aria-label="Stop"
-            className="w-10 h-10 shrink-0 rounded-full bg-gray-800 text-white flex items-center justify-center"
+            className="w-10 h-10 shrink-0 rounded-full bg-white text-gray-900 flex items-center justify-center"
           >
             <Square size={16} />
           </button>
@@ -430,7 +430,7 @@ export function FlyAIPage({
             type="submit"
             disabled={!text.trim() && !attach}
             aria-label="Send"
-            className="w-10 h-10 shrink-0 rounded-full bg-sky-500 text-white flex items-center justify-center disabled:opacity-50"
+            className="w-10 h-10 shrink-0 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 text-white flex items-center justify-center disabled:opacity-40"
           >
             <Send size={18} />
           </button>

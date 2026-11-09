@@ -32,6 +32,8 @@ import {
 import { auth, db, uploadToCloudinary, DEFAULT_AVATAR } from "../../lib/firebase";
 import { startPresence } from "./presence";
 import type { UserProfile } from "./types";
+import type { FieldPrivacy } from "./fieldPrivacy";
+import { assertCanCreateAccount, recordAccountOnDevice } from "./deviceLimit";
 
 interface AuthContextValue {
   user: User | null;
@@ -51,6 +53,7 @@ interface AuthContextValue {
       pronoun?: string;
       country?: string;
       preferredLanguage?: string;
+      fieldPrivacy?: FieldPrivacy;
     },
   ) => Promise<void>;
   logIn: (email: string, password: string) => Promise<void>;
@@ -87,6 +90,7 @@ function toProfile(firebaseUser: User, data: any): UserProfile {
     pronoun: data.pronoun ?? "",
     country: data.country ?? "",
     preferredLanguage: data.preferredLanguage ?? "",
+    fieldPrivacy: data.fieldPrivacy ?? {},
     followers: data.followers ?? [],
     following: data.following ?? [],
     suspendedUntil: data.suspendedUntil ?? 0,
@@ -215,7 +219,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     phone,
     extra,
   ) => {
+    await assertCanCreateAccount();
     const cred = await createUserWithEmailAndPassword(auth, email, password);
+    void recordAccountOnDevice(cred.user.uid);
     const firebaseUser = cred.user;
     let photoURL = DEFAULT_AVATAR;
     if (photoFile) photoURL = (await uploadToCloudinary(photoFile)).url;
@@ -233,6 +239,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       pronoun: (extra?.pronoun ?? "").trim(),
       country: (extra?.country ?? "").trim(),
       preferredLanguage: (extra?.preferredLanguage ?? "").trim(),
+      fieldPrivacy: extra?.fieldPrivacy ?? {},
       followers: [],
       following: [],
       createdAt: Date.now(),

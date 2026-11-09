@@ -15,6 +15,7 @@ import { Route as AgroRouteImport } from './routes/agro'
 import { Route as CampaignsRouteImport } from './routes/campaigns'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ApiDiagnoseRouteImport } from './routes/api/diagnose'
+import { Route as ApiEmailOtpRouteImport } from './routes/api/email-otp'
 import { Route as ApiFlyAiRouteImport } from './routes/api/fly-ai'
 import { Route as StudyIndexRouteImport } from './routes/study.index'
 import { Route as StudyBcsRouteImport } from './routes/study.bcs'
@@ -50,6 +51,11 @@ const ApiDiagnoseRoute = ApiDiagnoseRouteImport.update({
   path: '/api/diagnose',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiEmailOtpRoute = ApiEmailOtpRouteImport.update({
+  id: '/api/email-otp',
+  path: '/api/email-otp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiFlyAiRoute = ApiFlyAiRouteImport.update({
   id: '/api/fly-ai',
   path: '/api/fly-ai',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/campaigns': typeof CampaignsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/api/diagnose': typeof ApiDiagnoseRoute
+  '/api/email-otp': typeof ApiEmailOtpRoute
   '/api/fly-ai': typeof ApiFlyAiRoute
   '/study/bcs': typeof StudyBcsRoute
   '/study/math': typeof StudyMathRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/campaigns': typeof CampaignsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/api/diagnose': typeof ApiDiagnoseRoute
+  '/api/email-otp': typeof ApiEmailOtpRoute
   '/api/fly-ai': typeof ApiFlyAiRoute
   '/study/bcs': typeof StudyBcsRoute
   '/study/math': typeof StudyMathRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/campaigns': typeof CampaignsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/api/diagnose': typeof ApiDiagnoseRoute
+  '/api/email-otp': typeof ApiEmailOtpRoute
   '/api/fly-ai': typeof ApiFlyAiRoute
   '/study/bcs': typeof StudyBcsRoute
   '/study/math': typeof StudyMathRoute
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/campaigns'
     | '/reset-password'
     | '/api/diagnose'
+    | '/api/email-otp'
     | '/api/fly-ai'
     | '/study/bcs'
     | '/study/math'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/campaigns'
     | '/reset-password'
     | '/api/diagnose'
+    | '/api/email-otp'
     | '/api/fly-ai'
     | '/study/bcs'
     | '/study/math'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/campaigns'
     | '/reset-password'
     | '/api/diagnose'
+    | '/api/email-otp'
     | '/api/fly-ai'
     | '/study/bcs'
     | '/study/math'
@@ -154,6 +166,7 @@ export interface RootRouteChildren {
   CampaignsRoute: typeof CampaignsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiDiagnoseRoute: typeof ApiDiagnoseRoute
+  ApiEmailOtpRoute: typeof ApiEmailOtpRoute
   ApiFlyAiRoute: typeof ApiFlyAiRoute
   StudyBcsRoute: typeof StudyBcsRoute
   StudyMathRoute: typeof StudyMathRoute
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDiagnoseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/email-otp': {
+      id: '/api/email-otp'
+      path: '/api/email-otp'
+      fullPath: '/api/email-otp'
+      preLoaderRoute: typeof ApiEmailOtpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/fly-ai': {
       id: '/api/fly-ai'
       path: '/api/fly-ai'
@@ -242,6 +262,7 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignsRoute: CampaignsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiDiagnoseRoute: ApiDiagnoseRoute,
+  ApiEmailOtpRoute: ApiEmailOtpRoute,
   ApiFlyAiRoute: ApiFlyAiRoute,
   StudyBcsRoute: StudyBcsRoute,
   StudyMathRoute: StudyMathRoute,

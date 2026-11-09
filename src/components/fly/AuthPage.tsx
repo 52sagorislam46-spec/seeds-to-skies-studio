@@ -12,6 +12,8 @@ import {
   resolverFromError,
   sendMfaChallenge,
 } from "./mfa";
+import { sendEmailCode, verifyEmailCode } from "./emailOtp";
+import { DEFAULT_PRIVACY, PrivacyToggle, type FieldPrivacy, type PrivateField } from "./fieldPrivacy";
 
 function Field({
   label,
@@ -143,6 +145,15 @@ export function AuthPage() {
   const [resetSent, setResetSent] = useState("");
   const [showPasswordHelp, setShowPasswordHelp] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [privacy, setPrivacy] = useState<FieldPrivacy>({ ...DEFAULT_PRIVACY });
+  const [otpToken, setOtpToken] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpFor, setOtpFor] = useState("");
+  const privacyRow = (f: PrivateField) => (
+    <div className="flex justify-end -mt-2">
+      <PrivacyToggle value={privacy[f] ?? DEFAULT_PRIVACY[f]} onChange={(v) => setPrivacy((p) => ({ ...p, [f]: v }))} />
+    </div>
+  );
 
   const handleForgotPassword = async () => {
     setError("");
@@ -190,6 +201,29 @@ export function AuthPage() {
     setShowPasswordHelp(false);
     setBusy(true);
     try {
+      // E-mail verification code step (sign-up and login).
+      const key = `${mode}:${email.trim().toLowerCase()}`;
+      if (otpFor !== key + ":ok") {
+        if (!otpToken || otpFor !== key) {
+          if (mode === "signup" && !username.trim()) throw new Error("Username is required");
+          if (mode === "signup") {
+            const { assertCanCreateAccount } = await import("./deviceLimit");
+            await assertCanCreateAccount();
+          }
+          const sent = await sendEmailCode(email, mode);
+          if (sent.configured) {
+            setOtpToken(sent.token);
+            setOtpFor(key);
+            setOtpCode("");
+            setResetSent(`আপনার জিমেইলে (${email.trim()}) ৬ সংখ্যার কোড পাঠানো হয়েছে। কোডটি নিচে লিখুন।`);
+            return;
+          }
+        } else {
+          await verifyEmailCode(email, otpCode.trim(), otpToken);
+          setOtpFor(key + ":ok");
+          setResetSent("");
+        }
+      }
       if (mode === "login") {
         await logIn(email, password);
       } else {
@@ -203,7 +237,7 @@ export function AuthPage() {
           bio.trim(),
           photoFile,
           phone.trim(),
-          { birthDate, gender, pronoun, country, preferredLanguage },
+          { birthDate, gender, pronoun, country, preferredLanguage, fieldPrivacy: privacy },
         );
 
       }
@@ -314,6 +348,7 @@ export function AuthPage() {
                 placeholder="+8801XXXXXXXXX"
                 type="tel"
               />
+              {privacyRow("phone")}
               <Field
                 label="Bio"
                 value={bio}
@@ -327,12 +362,14 @@ export function AuthPage() {
                 type="date"
                 required={false}
               />
+              {privacyRow("birthDate")}
               <SelectField
                 label="Gender"
                 value={gender}
                 onChange={setGender}
                 options={["Man", "Woman", "Other", "Prefer not to say"]}
               />
+              {privacyRow("gender")}
               <SelectField
                 label="Pronoun"
                 value={pronoun}
@@ -355,6 +392,7 @@ export function AuthPage() {
                   "Other",
                 ]}
               />
+              {privacyRow("country")}
               <SelectField
                 label="Preferred Language"
                 value={preferredLanguage}
@@ -370,6 +408,7 @@ export function AuthPage() {
             placeholder="you@example.com"
             type="email"
           />
+          {mode === "signup" && privacyRow("email")}
           <Field
             label="Password"
             value={password}
@@ -413,13 +452,33 @@ export function AuthPage() {
               {resetSent}
             </p>
           )}
+          {otpToken && otpFor === `${mode}:${email.trim().toLowerCase()}` && (
+            <label className="block">
+              <span className="text-xs font-medium text-gray-500 mb-1 block">জিমেইলে পাওয়া কোড</span>
+              <input
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                placeholder="6-digit code"
+                className="w-full h-11 px-4 rounded-2xl bg-gray-50 border border-sky-200 text-gray-900 tracking-[0.4em] text-center font-semibold outline-none focus:ring-2 focus:ring-sky-100"
+              />
+              <button type="button" onClick={() => { setOtpToken(""); setOtpFor(""); }} className="mt-1 text-xs text-sky-500">
+                নতুন কোড পাঠান
+              </button>
+            </label>
+          )}
           <button
             type="submit"
             disabled={busy}
             className="w-full h-11 rounded-2xl bg-gradient-to-r from-sky-500 to-cyan-500 text-white font-semibold flex items-center justify-center gap-2 shadow-md shadow-sky-200 hover:shadow-lg hover:shadow-sky-300 transition-all active:scale-[0.98] disabled:opacity-60"
           >
             {busy && <Loader2 size={18} className="animate-spin" />}
-            {mode === "login" ? "Log in" : "Sign up"}
+            {otpToken && otpFor === `${mode}:${email.trim().toLowerCase()}`
+              ? "Verify code"
+              : otpFor === `${mode}:${email.trim().toLowerCase()}:ok`
+                ? mode === "login" ? "Log in" : "Sign up"
+                : "Send code"}
           </button>
 
           {resolver && (
