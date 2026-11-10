@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ImagePlus, Loader2, ShoppingBag, UserPlus, X } from "lucide-react";
 import { addDoc, collection, getDocs, limit, query, serverTimestamp } from "firebase/firestore";
+import { guardContent } from "./autoModeration";
 import { db, isVideoFile, uploadToCloudinary } from "../../lib/firebase";
 import { useAuth } from "./AuthContext";
 import { notifyUpload } from "../../lib/appNotifications";
@@ -77,6 +78,17 @@ export function CreatePostModal({ onClose }: { onClose: () => void }) {
     setError("");
     try {
       const profile = await ensureUserProfile();
+      const blocked = await guardContent({
+        uid: profile.uid,
+        displayName: profile.displayName,
+        username: profile.username,
+        text: `${text} ${tags} ${productTitle}`,
+        where: "a post",
+      });
+      if (blocked) {
+        setError(blocked);
+        return;
+      }
       let mediaUrl = "";
       let mediaType = "";
       const media: { url: string; type: string }[] = [];

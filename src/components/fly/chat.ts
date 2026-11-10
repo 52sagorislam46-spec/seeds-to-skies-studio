@@ -359,8 +359,20 @@ export async function fetchProfile(uid: string): Promise<UserProfile | null> {
     photoURL: data.photoURL ?? "",
     followers: data.followers ?? [],
     following: data.following ?? [],
+    ...publicDetails(data),
     createdAt: toMillis(data.createdAt),
   };
+}
+
+/** Only the profile details the owner marked "Public". */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function publicDetails(data: any): Partial<UserProfile> {
+  const out: Partial<UserProfile> = { fieldPrivacy: data.fieldPrivacy ?? {} };
+  const p = { birthDate: "public", phone: "private", email: "private", gender: "public", country: "public", ...(data.fieldPrivacy ?? {}) } as Record<string, string>;
+  for (const f of ["birthDate", "phone", "email", "gender", "country"] as const) {
+    if (p[f] === "public" && data[f]) (out as Record<string, string>)[f] = String(data[f]);
+  }
+  return out;
 }
 
 /* ---------------- delivery / seen receipts ---------------- */

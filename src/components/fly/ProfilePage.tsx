@@ -33,6 +33,7 @@ import { useDarkMode } from "./theme";
 import { isAdmin } from "./admins";
 import { useBackClose } from "./useBackClose";
 import type { UserProfile } from "./types";
+import { canSee, visibilityOf, type PrivateField } from "./fieldPrivacy";
 
 /** Facebook-style premium menu tile with a colorful gradient icon. */
 function MenuTile({
@@ -745,6 +746,7 @@ export function ProfilePage({
             {target.bio}
           </p>
         )}
+        <ProfileDetails target={target} viewerUid={user?.uid} admin={isAdmin(myProfile, user?.email)} />
 
         {isMe ? (
           <div className="mt-3 space-y-2">
@@ -1108,6 +1110,32 @@ export function ProfilePage({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ProfileDetails({ target, viewerUid, admin }: { target: UserProfile; viewerUid?: string | undefined; admin: boolean }) {
+  const rows: { f: PrivateField; label: string; value: string }[] = [
+    { f: "birthDate", label: "🎂 জন্মতারিখ", value: target.birthDate ?? "" },
+    { f: "gender", label: "👤 জেন্ডার", value: target.gender ?? "" },
+    { f: "country", label: "🌍 দেশ", value: target.country ?? "" },
+    { f: "phone", label: "📱 মোবাইল", value: target.phone ?? "" },
+    { f: "email", label: "✉️ ইমেইল", value: target.email ?? "" },
+  ];
+  const isOwner = viewerUid === target.uid;
+  const shown = rows.filter((r) => r.value && canSee(target, r.f, viewerUid, admin));
+  if (!shown.length) return null;
+  return (
+    <div className="mt-2 space-y-1 text-sm text-gray-600">
+      {shown.map((r) => (
+        <p key={r.f} className="flex items-center gap-2">
+          <span>{r.label}:</span>
+          <span className="font-medium text-gray-800">{r.value}</span>
+          {isOwner && visibilityOf(target, r.f) === "private" && (
+            <span className="text-[10px] text-gray-400">(Only me)</span>
+          )}
+        </p>
+      ))}
     </div>
   );
 }

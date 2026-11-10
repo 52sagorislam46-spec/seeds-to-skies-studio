@@ -6,12 +6,33 @@ import { auth, db, uploadToCloudinary } from "../../lib/firebase";
 import { Avatar } from "./Avatar";
 import { useAuth } from "./AuthContext";
 import { TwoFactorSection } from "./TwoFactorSection";
+import { PRIVATE_FIELDS, PrivacyToggle, visibilityOf, type PrivateField, type Visibility } from "./fieldPrivacy";
+
+const FIELD_META: { f: PrivateField; label: string; type: string }[] = [
+  { f: "birthDate", label: "জন্মতারিখ", type: "date" },
+  { f: "phone", label: "মোবাইল নম্বর", type: "tel" },
+  { f: "email", label: "ইমেইল", type: "email" },
+  { f: "gender", label: "জেন্ডার", type: "text" },
+  { f: "country", label: "দেশ", type: "text" },
+];
 
 export function EditProfilePage({ onBack }: { onBack: () => void }) {
   const { profile, refreshProfile } = useAuth();
   const [displayName, setDisplayName] = useState(profile?.displayName ?? "");
   const [username, setUsername] = useState(profile?.username ?? "");
   const [bio, setBio] = useState(profile?.bio ?? "");
+  const [details, setDetails] = useState<Record<PrivateField, string>>({
+    birthDate: profile?.birthDate ?? "",
+    phone: profile?.phone ?? "",
+    email: profile?.email ?? "",
+    gender: profile?.gender ?? "",
+    country: profile?.country ?? "",
+  });
+  const [privacy, setPrivacy] = useState<Record<PrivateField, Visibility>>(() => {
+    const out = {} as Record<PrivateField, Visibility>;
+    for (const f of PRIVATE_FIELDS) out[f] = visibilityOf(profile, f);
+    return out;
+  });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -43,6 +64,12 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
         username: cleanUsername,
         bio: bio.trim(),
         photoURL,
+        birthDate: details.birthDate,
+        phone: details.phone.trim(),
+        email: details.email.trim(),
+        gender: details.gender,
+        country: details.country.trim(),
+        fieldPrivacy: privacy,
       });
       if (auth.currentUser) {
         await updateProfile(auth.currentUser, {
@@ -124,6 +151,39 @@ export function EditProfilePage({ onBack }: { onBack: () => void }) {
             className="mt-1 w-full px-3 py-2 rounded-2xl bg-gray-50 border border-gray-100 text-sm outline-none focus:border-sky-300 resize-none"
           />
         </label>
+
+        <div className="space-y-3 rounded-2xl border border-gray-100 p-3">
+          <p className="text-xs font-semibold text-gray-500">
+            ব্যক্তিগত তথ্য — প্রতিটির পাশে Public / Only me বেছে নিন
+          </p>
+          {FIELD_META.map(({ f, label, type }) => (
+            <label key={f} className="block">
+              <span className="flex items-center justify-between text-xs font-semibold text-gray-500">
+                {label}
+                <PrivacyToggle value={privacy[f]} onChange={(v) => setPrivacy((p) => ({ ...p, [f]: v }))} />
+              </span>
+              {f === "gender" ? (
+                <select
+                  value={details.gender}
+                  onChange={(e) => setDetails((d) => ({ ...d, gender: e.target.value }))}
+                  className="mt-1 w-full h-11 px-3 rounded-2xl bg-gray-50 border border-gray-100 text-sm outline-none"
+                >
+                  <option value="">—</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              ) : (
+                <input
+                  type={type}
+                  value={details[f]}
+                  onChange={(e) => setDetails((d) => ({ ...d, [f]: e.target.value }))}
+                  className="mt-1 w-full h-11 px-3 rounded-2xl bg-gray-50 border border-gray-100 text-sm outline-none focus:border-sky-300"
+                />
+              )}
+            </label>
+          ))}
+        </div>
 
         <TwoFactorSection defaultPhone={profile.phone ?? ""} />
 

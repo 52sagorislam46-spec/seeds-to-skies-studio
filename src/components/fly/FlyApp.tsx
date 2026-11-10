@@ -34,6 +34,7 @@ import { TagFilterBar, collectTags, filterByTag } from "./TagFilterBar";
 import { useMessageNotifications } from "./useMessageNotifications";
 import { useUnreadMessages } from "./useUnreadMessages";
 import type { GroupConversation, UserProfile } from "./types";
+import { checkFriendBirthdays, startWatchdog } from "./appWatchdog";
 import { fetchProfile, groupFromData } from "./chat";
 
 function Feed({
@@ -247,6 +248,13 @@ function Shell() {
   const hasUnreadMessages = useUnreadMessages();
   const feedApiRef = useRef<{ refresh: () => void } | null>(null);
   const [openProfileMenu, setOpenProfileMenu] = useState(false);
+  const watchUserRef = useRef<{ uid: string; name: string } | null>(null);
+  watchUserRef.current = profile ? { uid: profile.uid, name: `${profile.displayName} (@${profile.username})` } : null;
+  useEffect(() => startWatchdog(() => watchUserRef.current), []);
+  useEffect(() => {
+    if (profile?.uid) void checkFriendBirthdays(profile).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.uid]);
 
   // ---- Browser/system back-button support ----
   // Every in-app navigation pushes a history entry holding a snapshot of the
