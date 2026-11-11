@@ -17,6 +17,9 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ApiDiagnoseRouteImport } from './routes/api/diagnose'
 import { Route as ApiEmailOtpRouteImport } from './routes/api/email-otp'
 import { Route as ApiFlyAiRouteImport } from './routes/api/fly-ai'
+import { Route as ApiMediaProxyRouteImport } from './routes/api/media-proxy'
+import { Route as ApiSttRouteImport } from './routes/api/stt'
+import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as StudyIndexRouteImport } from './routes/study.index'
 import { Route as StudyBcsRouteImport } from './routes/study.bcs'
 import { Route as StudyMathRouteImport } from './routes/study.math'
@@ -61,6 +64,21 @@ const ApiFlyAiRoute = ApiFlyAiRouteImport.update({
   path: '/api/fly-ai',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMediaProxyRoute = ApiMediaProxyRouteImport.update({
+  id: '/api/media-proxy',
+  path: '/api/media-proxy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSttRoute = ApiSttRouteImport.update({
+  id: '/api/stt',
+  path: '/api/stt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTtsRoute = ApiTtsRouteImport.update({
+  id: '/api/tts',
+  path: '/api/tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudyIndexRoute = StudyIndexRouteImport.update({
   id: '/study/',
   path: '/study/',
@@ -86,6 +104,9 @@ export interface FileRoutesByFullPath {
   '/api/diagnose': typeof ApiDiagnoseRoute
   '/api/email-otp': typeof ApiEmailOtpRoute
   '/api/fly-ai': typeof ApiFlyAiRoute
+  '/api/media-proxy': typeof ApiMediaProxyRoute
+  '/api/stt': typeof ApiSttRoute
+  '/api/tts': typeof ApiTtsRoute
   '/study/bcs': typeof StudyBcsRoute
   '/study/math': typeof StudyMathRoute
   '/study/': typeof StudyIndexRoute
@@ -99,6 +120,9 @@ export interface FileRoutesByTo {
   '/api/diagnose': typeof ApiDiagnoseRoute
   '/api/email-otp': typeof ApiEmailOtpRoute
   '/api/fly-ai': typeof ApiFlyAiRoute
+  '/api/media-proxy': typeof ApiMediaProxyRoute
+  '/api/stt': typeof ApiSttRoute
+  '/api/tts': typeof ApiTtsRoute
   '/study/bcs': typeof StudyBcsRoute
   '/study/math': typeof StudyMathRoute
   '/study': typeof StudyIndexRoute
@@ -113,6 +137,9 @@ export interface FileRoutesById {
   '/api/diagnose': typeof ApiDiagnoseRoute
   '/api/email-otp': typeof ApiEmailOtpRoute
   '/api/fly-ai': typeof ApiFlyAiRoute
+  '/api/media-proxy': typeof ApiMediaProxyRoute
+  '/api/stt': typeof ApiSttRoute
+  '/api/tts': typeof ApiTtsRoute
   '/study/bcs': typeof StudyBcsRoute
   '/study/math': typeof StudyMathRoute
   '/study/': typeof StudyIndexRoute
@@ -128,6 +155,9 @@ export interface FileRouteTypes {
     | '/api/diagnose'
     | '/api/email-otp'
     | '/api/fly-ai'
+    | '/api/media-proxy'
+    | '/api/stt'
+    | '/api/tts'
     | '/study/bcs'
     | '/study/math'
     | '/study/'
@@ -141,6 +171,9 @@ export interface FileRouteTypes {
     | '/api/diagnose'
     | '/api/email-otp'
     | '/api/fly-ai'
+    | '/api/media-proxy'
+    | '/api/stt'
+    | '/api/tts'
     | '/study/bcs'
     | '/study/math'
     | '/study'
@@ -154,6 +187,9 @@ export interface FileRouteTypes {
     | '/api/diagnose'
     | '/api/email-otp'
     | '/api/fly-ai'
+    | '/api/media-proxy'
+    | '/api/stt'
+    | '/api/tts'
     | '/study/bcs'
     | '/study/math'
     | '/study/'
@@ -168,6 +204,9 @@ export interface RootRouteChildren {
   ApiDiagnoseRoute: typeof ApiDiagnoseRoute
   ApiEmailOtpRoute: typeof ApiEmailOtpRoute
   ApiFlyAiRoute: typeof ApiFlyAiRoute
+  ApiMediaProxyRoute: typeof ApiMediaProxyRoute
+  ApiSttRoute: typeof ApiSttRoute
+  ApiTtsRoute: typeof ApiTtsRoute
   StudyBcsRoute: typeof StudyBcsRoute
   StudyMathRoute: typeof StudyMathRoute
   StudyIndexRoute: typeof StudyIndexRoute
@@ -231,6 +270,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiFlyAiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/media-proxy': {
+      id: '/api/media-proxy'
+      path: '/api/media-proxy'
+      fullPath: '/api/media-proxy'
+      preLoaderRoute: typeof ApiMediaProxyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/stt': {
+      id: '/api/stt'
+      path: '/api/stt'
+      fullPath: '/api/stt'
+      preLoaderRoute: typeof ApiSttRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/tts': {
+      id: '/api/tts'
+      path: '/api/tts'
+      fullPath: '/api/tts'
+      preLoaderRoute: typeof ApiTtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/study/': {
       id: '/study/'
       path: '/study'
@@ -264,6 +324,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDiagnoseRoute: ApiDiagnoseRoute,
   ApiEmailOtpRoute: ApiEmailOtpRoute,
   ApiFlyAiRoute: ApiFlyAiRoute,
+  ApiMediaProxyRoute: ApiMediaProxyRoute,
+  ApiSttRoute: ApiSttRoute,
+  ApiTtsRoute: ApiTtsRoute,
   StudyBcsRoute: StudyBcsRoute,
   StudyMathRoute: StudyMathRoute,
   StudyIndexRoute: StudyIndexRoute,

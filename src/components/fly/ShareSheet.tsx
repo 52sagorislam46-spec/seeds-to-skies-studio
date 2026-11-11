@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { saveMedia } from "./saveMedia";
 import {
   Check,
   CirclePlus,
@@ -314,18 +315,7 @@ export function ImageLightbox({
     if (downloading) return;
     setDownloading(true);
     try {
-      const res = await fetch(src);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
-    } catch {
-      window.open(src, "_blank", "noopener,noreferrer");
+      await saveMedia(src, fileName);
     } finally {
       setDownloading(false);
     }

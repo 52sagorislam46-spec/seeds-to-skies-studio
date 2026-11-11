@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { saveMedia } from "./saveMedia";
 import { Download, Minus, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -128,23 +129,9 @@ export function ImageLightbox({
   };
 
   const saveImage = async () => {
-    try {
-      const res = await fetch(src, { mode: "cors" });
-      if (!res.ok) throw new Error("fetch failed");
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `fly-photo-${Date.now()}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      toast.success("ছবি সেভ হয়েছে");
-    } catch {
-      window.open(src, "_blank");
-      toast.info("ছবি নতুন ট্যাবে খোলা হয়েছে — সেখান থেকে সেভ করুন");
-    }
+    const r = await saveMedia(src, `fly-photo-${Date.now()}.jpg`);
+    if (r === "opened") toast.info("ছবি নতুন ট্যাবে খোলা হয়েছে — সেখান থেকে সেভ করুন");
+    else toast.success("ছবি সেভ হয়েছে");
   };
 
   return (
